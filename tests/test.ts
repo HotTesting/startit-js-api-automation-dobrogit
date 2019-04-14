@@ -1,18 +1,86 @@
 import * as request from "request-promise-native";
+import * as faker from "faker";
+import { expect } from "chai";
 
-describe("Search", function() {
-    it("should be successful", async function() {
-        let resp = await request.post(
+describe("Users", function() {
+    it("Login as admin should be successful", async function() {
+        const adminLoginResp = await request.post(
             "http://ip-5236.sunline.net.ua:30020/users/login",
             {
                 json: true,
                 body: {
-                    email: "wekan_superadmin@ip-5236.sunline.net.ua",
-                    password: "wekan_superadmin@ip-5236.sunline.net.ua"
+                    email: "test@test.com",
+                    password: "123456"
                 }
             }
         );
-        console.log("Login successful!", resp);
-        console.log("You are set up!");
+        console.log("Login successful!", adminLoginResp);
+        expect(adminLoginResp, adminLoginResp)
+            .to.be.an("object")
+            .that.has.all.keys("token", "tokenExpires", "id");
+        expect(typeof adminLoginResp.token, adminLoginResp).to.equal("string");
+        expect(typeof adminLoginResp.tokenExpires, adminLoginResp).to.equal("string");
+        expect(typeof adminLoginResp.id, adminLoginResp).to.equal("string");
+    });
+
+    it("Existing user info", async function() {
+        const adminLoginResp = await request.post(
+            "http://ip-5236.sunline.net.ua:30020/users/login",
+            {
+                json: true,
+                body: {
+                    email: "test@test.com",
+                    password: "123456"
+                }
+            }
+        );
+    });
+
+    it("Unexisting user info", async function() {
+        
+    });
+
+    it("Existing user info with invalid token", async function() {
+        
+    });
+
+    it("Existing user info without token", async function() {
+        
+    });
+
+    it("User list", async function() {
+        
+    });
+
+    it("User list with invalid token", async function() {
+        
+    });
+
+    it("User list info without token", async function() {
+        
+    });
+
+    it("User logged in", async function() {
+        
+    });
+
+    it("User logged in without token", async function() {
+        
+    });
+
+    it("Delete existing user", async function() {
+        
+    });
+
+    it("Delete unexisting user", async function() {
+        
+    });
+
+    it("Delete User in without token", async function() {
+        
+    });
+
+    it("Delete User with invalid token", async function() {
+        
     });
 });
