@@ -23,7 +23,7 @@ describe("Users", function() {
         expect(typeof adminLoginResp.id, adminLoginResp).to.equal("string");
     });
 
-    it("Existing user info", async function() {
+    it.only("Existing user info", async function() {
         const adminLoginResp = await request.post(
             "http://ip-5236.sunline.net.ua:30020/users/login",
             {
@@ -34,6 +34,18 @@ describe("Users", function() {
                 }
             }
         );
+
+        const userInfoResp = await request.post(
+            "http://ip-5236.sunline.net.ua:30020/users/${adminLoginResp.id}",
+            {
+                json: true,
+                headers: {
+                    "Authorization": "Bearer" + adminLoginResp.token 
+                }
+            }
+        );
+
+        console.log(userInfoResp)
     });
 
     it("Unexisting user info", async function() {
