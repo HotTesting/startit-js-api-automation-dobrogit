@@ -1,20 +1,23 @@
-import * as request from "request-promise-native";
+import * as requestPromise  from "request-promise-native";
 import * as faker from "faker";
 import { expect } from "chai";
+import { stringify } from "querystring";
+
+let request = requestPromise.defaults({
+    json: true
+})
 
 describe("Users", function() {
     it("Login as admin should be successful", async function() {
-        const adminLoginResp = await request.post(
+        let adminLoginResp = await request.post(
             "http://ip-5236.sunline.net.ua:30020/users/login",
             {
-                json: true,
                 body: {
                     email: "test@test.com",
                     password: "123456"
                 }
             }
         );
-        console.log("Login successful!", adminLoginResp);
         expect(adminLoginResp, adminLoginResp)
             .to.be.an("object")
             .that.has.all.keys("token", "tokenExpires", "id");
@@ -23,76 +26,239 @@ describe("Users", function() {
         expect(typeof adminLoginResp.id, adminLoginResp).to.equal("string");
     });
 
-    it.only("Existing user info", async function() {
-        const adminLoginResp = await request.post(
-            "http://ip-5236.sunline.net.ua:30020/users/login",
+    it("receiving information about existing user by id should be successful", async function() {
+        let adminLoginResp = await request.post(
+            'http://ip-5236.sunline.net.ua:30020/users/login',
             {
-                json: true,
                 body: {
                     email: "test@test.com",
                     password: "123456"
                 }
             }
         );
-
-        const userInfoResp = await request.post(
-            "http://ip-5236.sunline.net.ua:30020/users/${adminLoginResp.id}",
+        let userInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/users/${adminLoginResp.id}`,
             {
-                json: true,
-                headers: {
-                    "Authorization": "Bearer" + adminLoginResp.token 
+                auth: {
+                    bearer: adminLoginResp.token 
                 }
             }
         );
-
-        console.log(userInfoResp)
+        expect(userInfoResp, userInfoResp)
+        .to.be.an('object')
+        .that.has.keys('_id','authenticationMethod','createdAt',
+         'username', 'emails', 'isAdmin', 'profile', 'services')
     });
 
-    it("Unexisting user info", async function() {
-        
+    it("receiving information about not existing user should return undefined", async function() {
+        let adminLoginResp = await request.post(
+            'http://ip-5236.sunline.net.ua:30020/users/login',
+            {
+                body: {
+                    email: "test@test.com",
+                    password: "123456"
+                }
+            }
+        );
+        let userInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/users/asdffasf`,
+            {
+                auth: {
+                    bearer: adminLoginResp.token 
+                }
+            }
+        );
+        expect(userInfoResp, userInfoResp)
+        .to.be.equal(undefined)
     });
 
-    it("Existing user info with invalid token", async function() {
-        
+    it("Request user by id with invalid token should return error", async function() {
+        let userInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/users/asdffasf`,
+            {
+                auth: {
+                    bearer: "adadadad" 
+                }
+            }
+        );
+        expect(userInfoResp, userInfoResp)
+        .to.be.an('object')
+        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized')
+        expect(userInfoResp.statusCode, userInfoResp.statusCode).to.equal(401)
     });
 
-    it("Existing user info without token", async function() {
-        
+    it("Request user by id without token should return error", async function() {
+        let userInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/users/asdffasf`);
+        expect(userInfoResp, userInfoResp)
+        .to.be.an('object')
+        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized')
+        expect(userInfoResp.statusCode, userInfoResp.statusCode).to.equal(401)
     });
 
-    it("User list", async function() {
-        
+    it("receiving users list should be successful", async function() {
+        let adminLoginResp = await request.post(
+            'http://ip-5236.sunline.net.ua:30020/users/login',
+            {
+                body: {
+                    email: "test@test.com",
+                    password: "123456"
+                }
+            }
+        );
+        let usersInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/users`,
+            {
+                auth: {
+                    bearer: adminLoginResp.token 
+                }
+            }
+        );
+        expect(usersInfoResp, usersInfoResp)
+        .to.be.an('array')
+        expect(usersInfoResp[0], usersInfoResp[0])
+        .that.has.keys('_id','username')
     });
 
-    it("User list with invalid token", async function() {
-        
+    it("Request users list with invalid token should return error", async function() {
+        let usersInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/users`,
+            {
+                auth: {
+                    bearer: "adadadad" 
+                }
+            }
+        );
+        expect(usersInfoResp, usersInfoResp)
+        .to.be.an('object')
+        expect(usersInfoResp.error, usersInfoResp.error).to.equal('Unauthorized')
+        expect(usersInfoResp.statusCode, usersInfoResp.statusCode).to.equal(401)
     });
 
-    it("User list info without token", async function() {
-        
+    it("Request users list without token should return error", async function() {
+        let usersInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/users`);
+        expect(usersInfoResp, usersInfoResp)
+        .to.be.an('object')
+        expect(usersInfoResp.error, usersInfoResp.error).to.equal('Unauthorized')
+        expect(usersInfoResp.statusCode, usersInfoResp.statusCode).to.equal(401)
     });
 
     it("User logged in", async function() {
+        let adminLoginResp = await request.post(
+            'http://ip-5236.sunline.net.ua:30020/users/login',
+            {
+                body: {
+                    email: "test@test.com",
+                    password: "123456"
+                }
+            }
+        );
+        let userInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/user`,
+            {
+                auth: {
+                    bearer: adminLoginResp.token 
+                }
+            }
+        );
+        expect(userInfoResp, userInfoResp)
+        .to.be.an('object')
+        .that.has.keys('_id','authenticationMethod','createdAt',
+        'username', 'emails', 'isAdmin', 'profile')
+         expect(userInfoResp._id, userInfoResp._id).to.be.equal(adminLoginResp.id)
+    });
+
+    it("Request user with invalid token should return error", async function() {
+        let userInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/user`,
+            {
+                auth: {
+                    bearer: "adadadad" 
+                }
+            }
+        );
+        expect(userInfoResp, userInfoResp)
+        .to.be.an('object')
+        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized')
+        expect(userInfoResp.statusCode, userInfoResp.statusCode).to.equal(401)
+    });
+
+    it("Request user without token should return error", async function() {
+        let userInfoResp = await request.get(
+            `http://ip-5236.sunline.net.ua:30020/api/user`);
+        expect(userInfoResp, userInfoResp)
+        .to.be.an('object')
+        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized')
+        expect(userInfoResp.statusCode, userInfoResp.statusCode).to.equal(401)
+    });
+
+    it("Delete existing user should be successful", async function() {
+        let adminLoginResp = await request.post(
+            "http://ip-5236.sunline.net.ua:30020/users/login",
+            {
+                body: {
+                    email: "test@test.com",
+                    password: "123456"
+                }
+            }
+        );
+        const email = faker.internet.email(
+            undefined,
+            undefined,
+            "ip-5236.sunline.net.ua"
+            );
+        let createUserResp = await request.post(
+            "http://ip-5236.sunline.net.ua:30020/api/users",
+            {
+                auth: {
+                    bearer: adminLoginResp.token 
+                },
+                body:{
+                    username: faker.internet.userName(),
+                    email: email,
+                    password: email
+                }
+            }
+        );
+        let deleteUserResp = await request.delete(
+                `http://ip-5236.sunline.net.ua:30020/api/users/${createUserResp._id}`,
+                {
+                    auth: {
+                        bearer: adminLoginResp.token 
+                    }  
+                }
+        );
+        expect(deleteUserResp._id, deleteUserResp._id).to.be.an('object')
+        expect(deleteUserResp._id, deleteUserResp._id).to.equal(createUserResp._id)
+    });
+
+    it("Delete not existing user should return error", async function() {
+        let adminLoginResp = await request.post(
+            "http://ip-5236.sunline.net.ua:30020/users/login",
+            {
+                body: {
+                    email: "test@test.com",
+                    password: "123456"
+                }
+            }
+        );
+        let userId = faker.random.alphaNumeric(7)
+        let deleteUserResp = await request.delete(
+            `http://ip-5236.sunline.net.ua:30020/api/users/${userId}`,
+            {
+                auth: {
+                    bearer: adminLoginResp.token 
+                }  
+            }
+        );
+    });
+
+    it("Delete User without token should return error", async function() {
         
     });
 
-    it("User logged in without token", async function() {
-        
-    });
-
-    it("Delete existing user", async function() {
-        
-    });
-
-    it("Delete unexisting user", async function() {
-        
-    });
-
-    it("Delete User in without token", async function() {
-        
-    });
-
-    it("Delete User with invalid token", async function() {
+    it("Delete User with invalid token should return error", async function() {
         
     });
 });

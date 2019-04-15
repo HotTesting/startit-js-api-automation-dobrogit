@@ -14,19 +14,20 @@
   "types": "index.d.ts",
   "dependencies": {
     "@types/chai": "*",
+    "@types/faker": "*",
     "@types/mocha": "*",
+    "@types/mongoose": "*",
     "@types/node": "*",
     "@types/request": "*",
     "@types/request-promise-native": "*",
-    "@types/faker": "*",
-    "@types/mongoose": "*",
     "chai": "^4.2.0",
+    "faker": "^4.1.0",
     "mocha": "^6.0.2",
+    "mongoose": "^5.5.0",
+    "npm": "^6.9.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "ts-node": "^8.0.3",
-    "typescript": "^3.4.2",
-    "faker": "^4.1.0",
-    "mongoose": "^5.5.0"
+    "typescript": "^3.4.2"
   }
 }
