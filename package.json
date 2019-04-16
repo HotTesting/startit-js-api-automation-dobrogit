@@ -1,13 +1,13 @@
 {
   "name": "startit-js-api-automation",
   "version": "1.0.0",
-  "description": "StartIT demo project for students",
+  "description": "Demo project for Wekan API",
   "scripts": {
     "test": "mocha --opts mocha.opts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Xotabu4/demo.git"
+    "url": "git+https://github.com/StartITProtractorJS/startit-js-api-automation-dobrogit"
   },
   "author": "Iaroslav Dobrosynets",
   "license": "MIT",
