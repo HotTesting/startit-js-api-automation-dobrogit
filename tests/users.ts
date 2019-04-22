@@ -1,6 +1,7 @@
 import * as requestPromise  from "request-promise-native";
 import * as faker from "faker";
-import { expect } from "chai"
+import { expect } from "chai";
+import { stringify } from "querystring";
 
 let request = requestPromise.defaults({
     json: true
@@ -46,7 +47,7 @@ describe("Users", function() {
         expect(userInfoResp, userInfoResp)
         .to.be.an('object')
         .that.has.keys('_id','authenticationMethod','createdAt',
-         'username', 'emails', 'isAdmin', 'profile', 'services');
+         'username', 'emails', 'isAdmin', 'profile', 'services')
     });
 
     it("receiving information about not existing user should return undefined", async function() {
@@ -68,22 +69,21 @@ describe("Users", function() {
             }
         );
         expect(userInfoResp, userInfoResp)
-        .to.be.equal(undefined);
+        .to.be.equal(undefined)
     });
 
     it("Request user by id with invalid token should return error", async function() {
-        let fakeToken = faker.random.alphaNumeric(12);
         let userInfoResp = await request.get(
             `http://ip-5236.sunline.net.ua:30020/api/users/asdffasf`,
             {
                 auth: {
-                    bearer: fakeToken 
+                    bearer: "adadadad" 
                 }
             }
         );
         expect(userInfoResp, userInfoResp)
-        .to.be.an('object');
-        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized');
+        .to.be.an('object')
+        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized')
         expect(userInfoResp.statusCode, userInfoResp.statusCode).to.equal(401)
     });
 
@@ -91,8 +91,8 @@ describe("Users", function() {
         let userInfoResp = await request.get(
             `http://ip-5236.sunline.net.ua:30020/api/users/asdffasf`);
         expect(userInfoResp, userInfoResp)
-        .to.be.an('object');
-        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized');
+        .to.be.an('object')
+        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized')
         expect(userInfoResp.statusCode, userInfoResp.statusCode).to.equal(401)
     });
 
@@ -115,24 +115,23 @@ describe("Users", function() {
             }
         );
         expect(usersInfoResp, usersInfoResp)
-        .to.be.an('array');
+        .to.be.an('array')
         expect(usersInfoResp[0], usersInfoResp[0])
-        .that.has.keys('_id','username');
+        .that.has.keys('_id','username')
     });
 
     it("Request users list with invalid token should return error", async function() {
-        let fakeToken = faker.random.alphaNumeric(12);
         let usersInfoResp = await request.get(
             `http://ip-5236.sunline.net.ua:30020/api/users`,
             {
                 auth: {
-                    bearer: fakeToken
+                    bearer: "adadadad" 
                 }
             }
         );
         expect(usersInfoResp, usersInfoResp)
-        .to.be.an('object');
-        expect(usersInfoResp.error, usersInfoResp.error).to.equal('Unauthorized');
+        .to.be.an('object')
+        expect(usersInfoResp.error, usersInfoResp.error).to.equal('Unauthorized')
         expect(usersInfoResp.statusCode, usersInfoResp.statusCode).to.equal(401)
     });
 
@@ -140,8 +139,8 @@ describe("Users", function() {
         let usersInfoResp = await request.get(
             `http://ip-5236.sunline.net.ua:30020/api/users`);
         expect(usersInfoResp, usersInfoResp)
-        .to.be.an('object');
-        expect(usersInfoResp.error, usersInfoResp.error).to.equal('Unauthorized');
+        .to.be.an('object')
+        expect(usersInfoResp.error, usersInfoResp.error).to.equal('Unauthorized')
         expect(usersInfoResp.statusCode, usersInfoResp.statusCode).to.equal(401)
     });
 
@@ -166,23 +165,22 @@ describe("Users", function() {
         expect(userInfoResp, userInfoResp)
         .to.be.an('object')
         .that.has.keys('_id','authenticationMethod','createdAt',
-        'username', 'emails', 'isAdmin', 'profile');
+        'username', 'emails', 'isAdmin', 'profile')
          expect(userInfoResp._id, userInfoResp._id).to.be.equal(adminLoginResp.id)
     });
 
     it("Request user with invalid token should return error", async function() {
-        let fakeToken = faker.random.alphaNumeric(12);
         let userInfoResp = await request.get(
             `http://ip-5236.sunline.net.ua:30020/api/user`,
             {
                 auth: {
-                    bearer: fakeToken 
+                    bearer: "adadadad" 
                 }
             }
         );
         expect(userInfoResp, userInfoResp)
-        .to.be.an('object');
-        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized');
+        .to.be.an('object')
+        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized')
         expect(userInfoResp.statusCode, userInfoResp.statusCode).to.equal(401)
     });
 
@@ -190,8 +188,8 @@ describe("Users", function() {
         let userInfoResp = await request.get(
             `http://ip-5236.sunline.net.ua:30020/api/user`);
         expect(userInfoResp, userInfoResp)
-        .to.be.an('object');
-        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized');
+        .to.be.an('object')
+        expect(userInfoResp.error, userInfoResp.error).to.equal('Unauthorized')
         expect(userInfoResp.statusCode, userInfoResp.statusCode).to.equal(401)
     });
 
@@ -231,7 +229,7 @@ describe("Users", function() {
                     }  
                 }
         );
-        expect(deleteUserResp, deleteUserResp).to.be.an('object');
+        expect(deleteUserResp._id, deleteUserResp._id).to.be.an('object')
         expect(deleteUserResp._id, deleteUserResp._id).to.equal(createUserResp._id)
     });
 
@@ -254,39 +252,13 @@ describe("Users", function() {
                 }  
             }
         );
-        // check if deleted
-        let findDeletedUserResp = await request.get(
-            `http://ip-5236.sunline.net.ua:30020/api/users/${userId}`,
-            {
-                auth: {
-                    bearer: adminLoginResp.token 
-                }  
-            }
-        );
-        expect(findDeletedUserResp, findDeletedUserResp).to.be.equal(undefined)
     });
 
     it("Delete User without token should return error", async function() {
-        let userId = faker.random.alphaNumeric(7);
-        let findDeletedUserResp = await request.get(
-            `http://ip-5236.sunline.net.ua:30020/api/users/${userId}`
-        );
-        expect(findDeletedUserResp.error, findDeletedUserResp.error).to.equal('Unauthorized');
-        expect(findDeletedUserResp.statusCode, findDeletedUserResp.statusCode).to.equal(401)
+        
     });
 
     it("Delete User with invalid token should return error", async function() {
-        let userId = faker.random.alphaNumeric(7);
-        let fakeToken = faker.random.alphaNumeric(12)
-        let findDeletedUserResp = await request.get(
-            `http://ip-5236.sunline.net.ua:30020/api/users/${userId}`,
-            {
-                auth: {
-                    bearer: fakeToken
-                }  
-            }
-        );
-        expect(findDeletedUserResp.error, findDeletedUserResp.error).to.equal('Unauthorized');
-        expect(findDeletedUserResp.statusCode, findDeletedUserResp.statusCode).to.equal(401)
+        
     });
 });
